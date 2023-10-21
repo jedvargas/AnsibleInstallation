@@ -1,0 +1,66 @@
+# In Ansible machine/ansible server only (Assume you have the Master and 2 Nodes):
+sudo su
+yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+yum update -y
+yum install git python python-level python-pip openssl ansible -y
+ansible --version
+
+
+#Add the private ip the node servers into the host file
+vi /etc/ansible/hosts
+#add [demo] above the line where you put the ip - this is the group name of the nodes (You can make your own)
+
+#Uncomment the following lines from ansible.cfg
+#from inventory (line 14) 
+#from sudo-user (line 22
+
+vi /etc/ansible/ansible.cfg
+
+#do the next stpe on all the ansible machine (Master and Node)
+#create a user with the name ansible (or whatever you prefer)
+
+adduser ansible
+passwd ansible  
+
+#Now we need to provide the authentication rights to the ansible user. So that the ansible user can perform sudo commands
+
+visudo
+#press i
+#scroll down and find  #All root to run any command ....
+
+#now there add 
+ansible ALL=(ALL) NOPASSWD: ALL  #(Add this below root)  
+#(line number: 101) 
+
+#Do this step in ansible and node servers (We need tp edit authentication in sshd_config):
+vi /etc/ssh/sshd_config
+#press i
+#in authentication,
+#uncomment Permit root login yes
+#(remove #)   (line number 38) 
+#scroll down and uncomment password authentication yes(by removing #) (line61) 
+#and comment password authentication no
+#(by putting #)(line 63) 
+
+service sshd restart
+
+#Apply sh-keygen to your nodes so you don't have to type password when connecting to the nodes from your master
+#Go to ansible server  (you need to ensure that you are logged in as ansible user) 
+
+ssh-keygen  #(press enter - enter - enter) 
+ls -a
+cd .ssh/
+ls
+ssh-copy-id ansible@<<private ip of node1>>
+#Enter password : last time it will ask for pass
+ssh-copy-id ansible@<<private ip of node2>>
+#Enter password : last time it will ask for pass
+cd ..
+ssh <<private ip of node1>>
+exit
+ssh <<private ip of node 2>>
+exit
+
+Do this in ansible machine	
+ansible all --list-hosts
+ansible demo --list-hosts #shows the list in the demo group
