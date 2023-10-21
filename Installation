@@ -61,6 +61,6 @@ exit
 ssh <<private ip of node 2>>
 exit
 
-Do this in ansible machine	
+#Do this in ansible machine	to verify that the nodes are setup correctly
 ansible all --list-hosts
 ansible demo --list-hosts #shows the list in the demo group
